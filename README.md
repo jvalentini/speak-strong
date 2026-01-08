@@ -1,5 +1,7 @@
 # Speak Strong
 
+![Speak Strong Banner](2026-01-08-11-08-speak-strong-banner.png)
+
 A CLI tool that transforms weak, hesitant language into strong, confident communication.
 
 ## The Problem
