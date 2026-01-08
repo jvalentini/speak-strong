@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   applyMatches,
   convertLegacyRule,
+  convertRuleEntry,
   findMatches,
   processWithRules,
 } from '../src/lib/rule-engine.js';
@@ -209,34 +210,43 @@ describe('applyMatches', () => {
 
 describe('sentence restructuring', () => {
   test('restructures "would you mind if I" to "I\'d like to"', () => {
-    const rule = convertLegacyRule({
-      pattern: 'would you mind if',
-      replacement: "I'd like to",
-      level: 'moderate',
-      category: 'weak-request',
-    });
+    const rule = convertRuleEntry(
+      {
+        pattern: 'would you mind if',
+        replacement: "I'd like to",
+        category: 'weak-request',
+        restructure: true,
+      },
+      'moderate'
+    );
     const result = processWithRules('Would you mind if I take this?', [rule]);
     expect(result.transformed).toBe("I'd like to take this?");
   });
 
   test('restructures with different subjects', () => {
-    const rule = convertLegacyRule({
-      pattern: 'would you mind if',
-      replacement: "I'd like to",
-      level: 'moderate',
-      category: 'weak-request',
-    });
+    const rule = convertRuleEntry(
+      {
+        pattern: 'would you mind if',
+        replacement: "I'd like to",
+        category: 'weak-request',
+        restructure: true,
+      },
+      'moderate'
+    );
     const result = processWithRules('Would you mind if we discuss this?', [rule]);
     expect(result.transformed).toBe("I'd like to discuss this?");
   });
 
   test('does not restructure when no subject follows', () => {
-    const rule = convertLegacyRule({
-      pattern: 'would you mind if',
-      replacement: "I'd like to",
-      level: 'moderate',
-      category: 'weak-request',
-    });
+    const rule = convertRuleEntry(
+      {
+        pattern: 'would you mind if',
+        replacement: "I'd like to",
+        category: 'weak-request',
+        restructure: true,
+      },
+      'moderate'
+    );
     const result = processWithRules('Would you mind if possible?', [rule]);
     expect(result.transformed).toBe("I'd like to possible?");
   });

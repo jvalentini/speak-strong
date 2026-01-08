@@ -3,106 +3,99 @@ import { fileURLToPath } from 'node:url';
 import type { Match, ProcessResult, Rule, RulesDatabase, StrictnessLevel } from '../types/index.js';
 import { loadJson } from '../utils/file.js';
 import { Logger } from '../utils/logger.js';
-import { convertLegacyRule, processWithRules, type TokenRule } from './rule-engine.js';
+import { convertRuleEntry, processWithRules, type TokenRule } from './rule-engine.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const RULES_PATH = join(__dirname, '../data/rules.json');
 
-let cachedRules: Rule[] | null = null;
-let cachedTokenRules: TokenRule[] | null = null;
+let cachedDb: RulesDatabase | null = null;
+let cachedTokenRules: Map<StrictnessLevel, TokenRule[]> | null = null;
 
-function loadRules(): Rule[] {
-  if (cachedRules) {
-    return cachedRules;
+function loadDatabase(): RulesDatabase {
+  if (cachedDb) {
+    return cachedDb;
   }
-  const db = loadJson<RulesDatabase>(RULES_PATH);
-  cachedRules = db.rules;
-  Logger.debug(`Loaded ${cachedRules.length} rules from database`);
-  return cachedRules;
+  cachedDb = loadJson<RulesDatabase>(RULES_PATH);
+  Logger.debug(`Loaded rules database v${cachedDb.version}`);
+  return cachedDb;
 }
 
-function loadTokenRules(): TokenRule[] {
+function buildTokenRules(): Map<StrictnessLevel, TokenRule[]> {
   if (cachedTokenRules) {
     return cachedTokenRules;
   }
-  const legacyRules = loadRules();
-  cachedTokenRules = legacyRules.map(convertLegacyRule);
-  Logger.debug(`Converted ${cachedTokenRules.length} rules to token format`);
+
+  const db = loadDatabase();
+  cachedTokenRules = new Map();
+
+  cachedTokenRules.set(
+    'conservative',
+    db.conservative.map((entry) => convertRuleEntry(entry, 'conservative'))
+  );
+  cachedTokenRules.set(
+    'moderate',
+    db.moderate.map((entry) => convertRuleEntry(entry, 'moderate'))
+  );
+  cachedTokenRules.set(
+    'aggressive',
+    db.aggressive.map((entry) => convertRuleEntry(entry, 'aggressive'))
+  );
+
+  const total = db.conservative.length + db.moderate.length + db.aggressive.length;
+  Logger.debug(`Converted ${total} rules to token format`);
+
   return cachedTokenRules;
 }
 
-function getApplicableRules(level: StrictnessLevel): Rule[] {
-  const rules = loadRules();
-  const levels: StrictnessLevel[] = ['conservative'];
-
-  if (level === 'moderate' || level === 'aggressive') {
-    levels.push('moderate');
-  }
-  if (level === 'aggressive') {
-    levels.push('aggressive');
-  }
-
-  const applicable = rules.filter((r) => levels.includes(r.level));
-  Logger.debug(`Filtering rules for level '${level}': ${applicable.length} applicable`);
-  return applicable;
-}
-
 function getApplicableTokenRules(level: StrictnessLevel): TokenRule[] {
-  const rules = loadTokenRules();
-  const levels: StrictnessLevel[] = ['conservative'];
+  const rulesByLevel = buildTokenRules();
+  const rules = [...(rulesByLevel.get('conservative') || [])];
 
   if (level === 'moderate' || level === 'aggressive') {
-    levels.push('moderate');
+    rules.push(...(rulesByLevel.get('moderate') || []));
   }
   if (level === 'aggressive') {
-    levels.push('aggressive');
+    rules.push(...(rulesByLevel.get('aggressive') || []));
   }
 
-  return rules.filter((r) => levels.includes(r.level));
+  Logger.debug(`Applying ${rules.length} rules for level '${level}'`);
+  return rules;
 }
 
-function ruleMatchToMatch(
-  ruleMatch: {
-    rule: TokenRule;
-    textStart: number;
-    textEnd: number;
-    matchedTokens: { text: string }[];
-    replacementText: string | null;
-  },
-  legacyRules: Rule[]
-): Match {
-  const originalText = ruleMatch.matchedTokens.map((t) => t.text).join('');
-  const legacyRule = legacyRules.find(
-    (r) =>
-      r.pattern.toLowerCase().replace(/\s+/g, '') ===
-      ruleMatch.rule.pattern.map((p) => p.text).join('')
-  );
-
-  const fallbackRule: Rule = {
-    pattern: ruleMatch.rule.pattern.map((p) => p.text).join(' '),
-    replacement: ruleMatch.rule.replacement?.join(' ') ?? null,
-    level: ruleMatch.rule.level,
-    category: ruleMatch.rule.category,
-    suggestion: ruleMatch.rule.suggestion,
+function tokenRuleToRule(tokenRule: TokenRule): Rule {
+  return {
+    pattern: tokenRule.pattern.map((p) => p.text).join(' '),
+    replacement: tokenRule.replacement?.join(' ') ?? null,
+    level: tokenRule.level,
+    category: tokenRule.category,
+    suggestion: tokenRule.suggestion,
   };
+}
+
+function ruleMatchToMatch(ruleMatch: {
+  rule: TokenRule;
+  textStart: number;
+  textEnd: number;
+  matchedTokens: { text: string }[];
+  replacementText: string | null;
+}): Match {
+  const originalText = ruleMatch.matchedTokens.map((t) => t.text).join('');
 
   return {
     original: originalText,
     replacement: ruleMatch.replacementText,
     start: ruleMatch.textStart,
     end: ruleMatch.textEnd,
-    rule: legacyRule || fallbackRule,
+    rule: tokenRuleToRule(ruleMatch.rule),
   };
 }
 
 export function processText(text: string, level: StrictnessLevel): ProcessResult {
   const tokenRules = getApplicableTokenRules(level);
-  const legacyRules = getApplicableRules(level);
-
   const result = processWithRules(text, tokenRules);
 
-  const replacements = result.matches.map((m) => ruleMatchToMatch(m, legacyRules));
-  const suggestions = result.suggestions.map((m) => ruleMatchToMatch(m, legacyRules));
+  const replacements = result.matches.map(ruleMatchToMatch);
+  const suggestions = result.suggestions.map(ruleMatchToMatch);
 
   Logger.verbose(
     `Processed text: ${replacements.length} replacements, ${suggestions.length} suggestions`

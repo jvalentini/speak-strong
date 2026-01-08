@@ -89,16 +89,45 @@ function normalizePatternText(text: string): TokenPattern[] {
     .filter((t) => t.text.length > 0);
 }
 
-const RESTRUCTURE_RULES: Record<string, { captures: CaptureConfig[]; replacement: string[] }> = {
-  'would you mind if': {
-    captures: [{ name: 'subject' }],
-    replacement: ["I'd", 'like', 'to'],
-  },
-  'i was wondering if you could': {
-    captures: [],
-    replacement: ['Could', 'you'],
-  },
+const RESTRUCTURE_CAPTURES: Record<string, CaptureConfig[]> = {
+  'would you mind if': [{ name: 'subject' }],
 };
+
+export function convertRuleEntry(
+  entry: {
+    pattern: string;
+    replacement?: string;
+    category: string;
+    suggestion?: string;
+    restructure?: boolean;
+  },
+  level: StrictnessLevel
+): TokenRule {
+  const pattern = normalizePatternText(entry.pattern);
+  const patternKey = entry.pattern.toLowerCase();
+
+  let replacement: string[] | null;
+  if (entry.suggestion && entry.replacement === undefined) {
+    replacement = null;
+  } else if (entry.replacement === undefined || entry.replacement === '') {
+    replacement = [];
+  } else {
+    replacement = entry.replacement.split(/\s+/).filter(Boolean);
+  }
+
+  const captures = RESTRUCTURE_CAPTURES[patternKey];
+  const restructure = entry.restructure && captures ? { template: '', captures } : undefined;
+
+  return {
+    id: `${level}-${patternKey.replace(/\s+/g, '-')}`,
+    pattern,
+    replacement,
+    level,
+    category: entry.category,
+    suggestion: entry.suggestion,
+    restructure,
+  };
+}
 
 export function convertLegacyRule(legacy: {
   pattern: string;
@@ -107,42 +136,15 @@ export function convertLegacyRule(legacy: {
   category: string;
   suggestion?: string;
 }): TokenRule {
-  const pattern = normalizePatternText(legacy.pattern);
-  const patternKey = legacy.pattern.toLowerCase();
-
-  const restructureConfig = RESTRUCTURE_RULES[patternKey];
-  if (restructureConfig) {
-    return {
-      id: `legacy-${patternKey.replace(/\s+/g, '-')}`,
-      pattern,
-      replacement: restructureConfig.replacement,
-      level: legacy.level,
+  return convertRuleEntry(
+    {
+      pattern: legacy.pattern,
+      replacement: legacy.replacement ?? undefined,
       category: legacy.category,
       suggestion: legacy.suggestion,
-      restructure: {
-        template: '',
-        captures: restructureConfig.captures,
-      },
-    };
-  }
-
-  let replacement: string[] | null;
-  if (legacy.replacement === null) {
-    replacement = null;
-  } else if (legacy.replacement === '') {
-    replacement = [];
-  } else {
-    replacement = legacy.replacement.split(/\s+/).filter(Boolean);
-  }
-
-  return {
-    id: `legacy-${legacy.pattern.toLowerCase().replace(/\s+/g, '-')}`,
-    pattern,
-    replacement,
-    level: legacy.level,
-    category: legacy.category,
-    suggestion: legacy.suggestion,
-  };
+    },
+    legacy.level
+  );
 }
 
 function matchesPattern(
