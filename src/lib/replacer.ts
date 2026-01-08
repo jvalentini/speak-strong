@@ -3,11 +3,13 @@ import { fileURLToPath } from 'node:url';
 import type { Match, ProcessResult, Rule, RulesDatabase, StrictnessLevel } from '../types/index.js';
 import { loadJson } from '../utils/file.js';
 import { Logger } from '../utils/logger.js';
+import { convertLegacyRule, processWithRules, type TokenRule } from './rule-engine.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const RULES_PATH = join(__dirname, '../data/rules.json');
 
 let cachedRules: Rule[] | null = null;
+let cachedTokenRules: TokenRule[] | null = null;
 
 function loadRules(): Rule[] {
   if (cachedRules) {
@@ -17,6 +19,16 @@ function loadRules(): Rule[] {
   cachedRules = db.rules;
   Logger.debug(`Loaded ${cachedRules.length} rules from database`);
   return cachedRules;
+}
+
+function loadTokenRules(): TokenRule[] {
+  if (cachedTokenRules) {
+    return cachedTokenRules;
+  }
+  const legacyRules = loadRules();
+  cachedTokenRules = legacyRules.map(convertLegacyRule);
+  Logger.debug(`Converted ${cachedTokenRules.length} rules to token format`);
+  return cachedTokenRules;
 }
 
 function getApplicableRules(level: StrictnessLevel): Rule[] {
@@ -35,146 +47,62 @@ function getApplicableRules(level: StrictnessLevel): Rule[] {
   return applicable;
 }
 
-function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function getApplicableTokenRules(level: StrictnessLevel): TokenRule[] {
+  const rules = loadTokenRules();
+  const levels: StrictnessLevel[] = ['conservative'];
+
+  if (level === 'moderate' || level === 'aggressive') {
+    levels.push('moderate');
+  }
+  if (level === 'aggressive') {
+    levels.push('aggressive');
+  }
+
+  return rules.filter((r) => levels.includes(r.level));
 }
 
-function preserveCase(original: string, replacement: string): string {
-  if (!replacement) return replacement;
+function ruleMatchToMatch(
+  ruleMatch: {
+    rule: TokenRule;
+    textStart: number;
+    textEnd: number;
+    matchedTokens: { text: string }[];
+    replacementText: string | null;
+  },
+  legacyRules: Rule[]
+): Match {
+  const originalText = ruleMatch.matchedTokens.map((t) => t.text).join('');
+  const legacyRule = legacyRules.find(
+    (r) =>
+      r.pattern.toLowerCase().replace(/\s+/g, '') ===
+      ruleMatch.rule.pattern.map((p) => p.text).join('')
+  );
 
-  const isAllUpper = original === original.toUpperCase() && original !== original.toLowerCase();
-  const isAllLower = original === original.toLowerCase() && original !== original.toUpperCase();
-  const isCapitalized =
-    original[0] === original[0].toUpperCase() &&
-    original.slice(1) === original.slice(1).toLowerCase();
+  const fallbackRule: Rule = {
+    pattern: ruleMatch.rule.pattern.map((p) => p.text).join(' '),
+    replacement: ruleMatch.rule.replacement?.join(' ') ?? null,
+    level: ruleMatch.rule.level,
+    category: ruleMatch.rule.category,
+    suggestion: ruleMatch.rule.suggestion,
+  };
 
-  if (isAllUpper) {
-    return replacement.toUpperCase();
-  }
-  if (isAllLower) {
-    return replacement.toLowerCase();
-  }
-  if (isCapitalized) {
-    return replacement.charAt(0).toUpperCase() + replacement.slice(1).toLowerCase();
-  }
-
-  return replacement;
+  return {
+    original: originalText,
+    replacement: ruleMatch.replacementText,
+    start: ruleMatch.textStart,
+    end: ruleMatch.textEnd,
+    rule: legacyRule || fallbackRule,
+  };
 }
 
 export function processText(text: string, level: StrictnessLevel): ProcessResult {
-  const rules = getApplicableRules(level);
+  const tokenRules = getApplicableTokenRules(level);
+  const legacyRules = getApplicableRules(level);
 
-  // Sort rules by pattern length (longest first) to avoid partial replacements
-  const sortedRules = [...rules].sort((a, b) => b.pattern.length - a.pattern.length);
+  const result = processWithRules(text, tokenRules);
 
-  const replacements: Match[] = [];
-  const suggestions: Match[] = [];
-  let transformed = text;
-
-  // Track positions that have been replaced to avoid overlapping
-  const replacedRanges: Array<{ start: number; end: number }> = [];
-
-  for (const rule of sortedRules) {
-    // Use word boundaries for matching, case-insensitive
-    const pattern = new RegExp(`\\b${escapeRegex(rule.pattern)}\\b`, 'gi');
-
-    // Reset lastIndex for fresh search
-    pattern.lastIndex = 0;
-
-    // Find all matches in the ORIGINAL text to track positions
-    const originalMatches: Array<{ start: number; end: number; matched: string }> = [];
-    const searchText = text;
-    let match = pattern.exec(searchText);
-    while (match !== null) {
-      originalMatches.push({
-        start: match.index,
-        end: match.index + match[0].length,
-        matched: match[0],
-      });
-      match = pattern.exec(searchText);
-    }
-
-    for (const origMatch of originalMatches) {
-      // Check if this position overlaps with an already replaced range
-      const overlaps = replacedRanges.some(
-        (range) =>
-          (origMatch.start >= range.start && origMatch.start < range.end) ||
-          (origMatch.end > range.start && origMatch.end <= range.end) ||
-          (origMatch.start <= range.start && origMatch.end >= range.end)
-      );
-
-      if (overlaps) {
-        Logger.debug(`Skipping overlapping match: "${origMatch.matched}"`);
-        continue;
-      }
-
-      if (rule.replacement === null) {
-        // This is a suggestion-only rule
-        suggestions.push({
-          original: origMatch.matched,
-          replacement: null,
-          start: origMatch.start,
-          end: origMatch.end,
-          rule,
-        });
-      } else {
-        const preserved = preserveCase(origMatch.matched, rule.replacement);
-        replacements.push({
-          original: origMatch.matched,
-          replacement: preserved,
-          start: origMatch.start,
-          end: origMatch.end,
-          rule,
-        });
-        replacedRanges.push({ start: origMatch.start, end: origMatch.end });
-      }
-    }
-  }
-
-  // Sort replacements by position (descending) to replace from end to start
-  // This preserves positions for earlier replacements
-  const sortedReplacements = [...replacements].sort((a, b) => b.start - a.start);
-
-  // Use position-based replacement to preserve formatting exactly
-  // Since we're replacing from end to start, positions remain valid in the original text
-  for (const rep of sortedReplacements) {
-    const before = transformed.slice(0, rep.start);
-    const after = transformed.slice(rep.end);
-    transformed = before + (rep.replacement || '') + after;
-  }
-
-  // Clean up multiple spaces within lines (preserve newlines and tabs)
-  // Split by newlines, process each line, then rejoin
-  const lines = transformed.split('\n');
-  const cleanedLines = lines.map((line) => {
-    // Collapse multiple spaces within the line (but preserve tabs)
-    let cleaned = line.replace(/[ ]{2,}/g, ' ');
-    // Fix punctuation spacing (e.g., " ," becomes ",")
-    cleaned = cleaned.replace(/\s+([.,!?;:])/g, '$1');
-    // Remove leading spaces (but preserve tabs for indentation)
-    cleaned = cleaned.replace(/^[ ]+/g, '');
-    // Remove trailing spaces
-    cleaned = cleaned.replace(/[ ]+$/g, '');
-    return cleaned;
-  });
-  transformed = cleanedLines.join('\n');
-
-  // Fix sentence start after removal (capitalize first letter after . ! ?)
-  transformed = transformed.replace(/([.!?]\s+)([a-z])/g, (_, punct, letter) => {
-    return punct + letter.toUpperCase();
-  });
-
-  // Capitalize first letter of text if it starts lowercase (only on first non-whitespace char)
-  const firstNonWhitespace = transformed.search(/\S/);
-  if (
-    firstNonWhitespace !== -1 &&
-    transformed[firstNonWhitespace] !== transformed[firstNonWhitespace].toUpperCase()
-  ) {
-    transformed =
-      transformed.slice(0, firstNonWhitespace) +
-      transformed[firstNonWhitespace].toUpperCase() +
-      transformed.slice(firstNonWhitespace + 1);
-  }
+  const replacements = result.matches.map((m) => ruleMatchToMatch(m, legacyRules));
+  const suggestions = result.suggestions.map((m) => ruleMatchToMatch(m, legacyRules));
 
   Logger.verbose(
     `Processed text: ${replacements.length} replacements, ${suggestions.length} suggestions`
@@ -182,7 +110,7 @@ export function processText(text: string, level: StrictnessLevel): ProcessResult
 
   return {
     original: text,
-    transformed,
+    transformed: result.transformed,
     replacements,
     suggestions,
   };

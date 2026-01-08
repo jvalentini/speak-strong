@@ -167,9 +167,9 @@ describe('processText - moderate level', () => {
     expect(result.transformed).toBe('We should proceed');
   });
 
-  test('replaces "would you mind if" with "I\'d like to"', () => {
+  test('replaces "would you mind if" with "I\'d like to" (restructures sentence)', () => {
     const result = processText('Would you mind if I take this task?', 'moderate');
-    expect(result.transformed).toBe("I'd like to I take this task?");
+    expect(result.transformed).toBe("I'd like to take this task?");
   });
 
   test('removes "this might be a stupid question, but"', () => {
