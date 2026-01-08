@@ -135,26 +135,45 @@ export function processText(text: string, level: StrictnessLevel): ProcessResult
   // This preserves positions for earlier replacements
   const sortedReplacements = [...replacements].sort((a, b) => b.start - a.start);
 
+  // Use position-based replacement to preserve formatting exactly
+  // Since we're replacing from end to start, positions remain valid in the original text
   for (const rep of sortedReplacements) {
-    // Find the match in the current transformed text
-    const pattern = new RegExp(`\\b${escapeRegex(rep.original)}\\b`, 'gi');
-    transformed = transformed.replace(pattern, () => rep.replacement || '');
+    const before = transformed.slice(0, rep.start);
+    const after = transformed.slice(rep.end);
+    transformed = before + (rep.replacement || '') + after;
   }
 
-  // Clean up double spaces and trim
-  transformed = transformed.replace(/\s{2,}/g, ' ').trim();
-
-  // Fix punctuation spacing (e.g., " ," becomes ",")
-  transformed = transformed.replace(/\s+([.,!?;:])/g, '$1');
+  // Clean up multiple spaces within lines (preserve newlines and tabs)
+  // Split by newlines, process each line, then rejoin
+  const lines = transformed.split('\n');
+  const cleanedLines = lines.map((line) => {
+    // Collapse multiple spaces within the line (but preserve tabs)
+    let cleaned = line.replace(/[ ]{2,}/g, ' ');
+    // Fix punctuation spacing (e.g., " ," becomes ",")
+    cleaned = cleaned.replace(/\s+([.,!?;:])/g, '$1');
+    // Remove leading spaces (but preserve tabs for indentation)
+    cleaned = cleaned.replace(/^[ ]+/g, '');
+    // Remove trailing spaces
+    cleaned = cleaned.replace(/[ ]+$/g, '');
+    return cleaned;
+  });
+  transformed = cleanedLines.join('\n');
 
   // Fix sentence start after removal (capitalize first letter after . ! ?)
   transformed = transformed.replace(/([.!?]\s+)([a-z])/g, (_, punct, letter) => {
     return punct + letter.toUpperCase();
   });
 
-  // Capitalize first letter of text if it starts lowercase
-  if (transformed.length > 0 && transformed[0] !== transformed[0].toUpperCase()) {
-    transformed = transformed[0].toUpperCase() + transformed.slice(1);
+  // Capitalize first letter of text if it starts lowercase (only on first non-whitespace char)
+  const firstNonWhitespace = transformed.search(/\S/);
+  if (
+    firstNonWhitespace !== -1 &&
+    transformed[firstNonWhitespace] !== transformed[firstNonWhitespace].toUpperCase()
+  ) {
+    transformed =
+      transformed.slice(0, firstNonWhitespace) +
+      transformed[firstNonWhitespace].toUpperCase() +
+      transformed.slice(firstNonWhitespace + 1);
   }
 
   Logger.verbose(

@@ -1,2 +1,16 @@
-Subject: Quick follow-up on yesterday's meeting Hi Sarah, I wanted to follow up on our conversation from yesterday. We should maybe consider pushing back the launch date by a week or two. I believe the team might need more time to finish the testing phase. Excuse me with this, but I was wondering if you could check with the dev team about their timeline? I know you're busy, so I hate to ask, but it would really help. Also, I disagree with the decision to cut the onboarding flow. I believe it might cause confusion for new users. Let me know if you have questions? I could be wrong though. I will get the updated mockups to you by Friday. We will review them together next week, if you have time. Thanks for your patience with all my questions! Best,
+Subject: Quick follow-up on yesterday's meeting
+
+Hi Sarah,
+
+I wanted to follow up on our conversation from yesterday. We should maybe consider pushing back the launch date by a week or two. I believe the team might need more time to finish the testing phase.
+
+Excuse me with this, but I was wondering if you could check with the dev team about their timeline? I know you're busy, so I hate to ask, but it would really help.
+
+Also, I disagree with the decision to cut the onboarding flow. I believe it might cause confusion for new users. Let me know if you have questions? I could be wrong though.
+
+I will get the updated mockups to you by Friday. We will review them together next week, if you have time.
+
+Thanks for your patience with all my questions!
+
+Best,
 Alex

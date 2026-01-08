@@ -91,12 +91,35 @@ export function applyAcceptedReplacements(original: string, accepted: Match[]): 
     result = before + (match.replacement || '') + after;
   }
 
-  result = result.replace(/\s{2,}/g, ' ').trim();
-  result = result.replace(/\s+([.,!?;:])/g, '$1');
+  // Clean up multiple spaces within lines (preserve newlines and tabs)
+  // Split by newlines, process each line, then rejoin
+  const lines = result.split('\n');
+  const cleanedLines = lines.map((line) => {
+    // Collapse multiple spaces within the line (but preserve tabs)
+    let cleaned = line.replace(/[ ]{2,}/g, ' ');
+    // Fix punctuation spacing (e.g., " ," becomes ",")
+    cleaned = cleaned.replace(/\s+([.,!?;:])/g, '$1');
+    // Remove leading spaces (but preserve tabs for indentation)
+    cleaned = cleaned.replace(/^[ ]+/g, '');
+    // Remove trailing spaces
+    cleaned = cleaned.replace(/[ ]+$/g, '');
+    return cleaned;
+  });
+  result = cleanedLines.join('\n');
+
+  // Fix sentence start after removal (capitalize first letter after . ! ?)
   result = result.replace(/([.!?]\s+)([a-z])/g, (_, punct, letter) => punct + letter.toUpperCase());
 
-  if (result.length > 0 && result[0] !== result[0].toUpperCase()) {
-    result = result[0].toUpperCase() + result.slice(1);
+  // Capitalize first letter of text if it starts lowercase (only on first non-whitespace char)
+  const firstNonWhitespace = result.search(/\S/);
+  if (
+    firstNonWhitespace !== -1 &&
+    result[firstNonWhitespace] !== result[firstNonWhitespace].toUpperCase()
+  ) {
+    result =
+      result.slice(0, firstNonWhitespace) +
+      result[firstNonWhitespace].toUpperCase() +
+      result.slice(firstNonWhitespace + 1);
   }
 
   return result;

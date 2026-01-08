@@ -94,4 +94,43 @@ describe('applyAcceptedReplacements', () => {
     const result = applyAcceptedReplacements(original, matches);
     expect(result).toBe('Perhaps we should try');
   });
+
+  test('preserves newlines', () => {
+    const original = 'I think we should.\n\nMaybe we can.';
+    const matches = [createMatch('I think', 'I believe', 0, 7)];
+    const result = applyAcceptedReplacements(original, matches);
+    expect(result).toContain('\n\n');
+    expect(result.split('\n').length).toBe(3);
+  });
+
+  test('preserves tabs', () => {
+    const original = 'I think we should:\n\t- First\n\t- Second';
+    const matches = [createMatch('I think', 'I believe', 0, 7)];
+    const result = applyAcceptedReplacements(original, matches);
+    expect(result).toContain('\t');
+    expect(result).toContain('\t- First');
+  });
+
+  test('collapses multiple spaces within lines but preserves newlines', () => {
+    const original = 'I think  we  should.\n\nMaybe  we  can.';
+    const matches = [createMatch('I think', 'I believe', 0, 7)];
+    const result = applyAcceptedReplacements(original, matches);
+    expect(result).not.toContain('  '); // Multiple spaces collapsed
+    expect(result).toContain('\n\n'); // Newlines preserved
+  });
+
+  test('preserves multi-line formatting', () => {
+    const original = `Subject: Test
+
+I think we should meet.
+
+Best,
+John`;
+    const matches = [createMatch('I think', 'I believe', 15, 22)];
+    const result = applyAcceptedReplacements(original, matches);
+    expect(result).toContain('Subject: Test');
+    expect(result).toContain('Best,');
+    expect(result).toContain('John');
+    expect(result.split('\n').length).toBeGreaterThan(4);
+  });
 });

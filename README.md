@@ -173,6 +173,36 @@ Press Ctrl+C to stop
 Stopped watching.
 ```
 
+### History and Undo
+
+All transformations are automatically saved to history (`~/.speak-strong/history.json`):
+
+```bash
+# View recent transformations
+speak-strong --history
+speak-strong --history-limit 5
+
+# Show details of a specific transformation
+speak-strong --show abc123
+
+# Undo the last transformation (restores original file)
+speak-strong --undo
+
+# Undo a specific transformation
+speak-strong --undo abc123
+```
+
+Example history output:
+```
+Recent transformations:
+
+  abc123  1/8/2024, 10:30:00 AM
+    /path/to/email.txt → 3 replacements
+
+  def456  1/8/2024, 10:25:00 AM
+    (message) → 1 replacement
+```
+
 ### Verbosity Options
 
 ```bash
@@ -261,6 +291,7 @@ speak-strong/
 ├── src/
 │   ├── lib/
 │   │   ├── interactive.ts # Interactive mode prompts
+│   │   ├── history.ts    # History tracking and undo
 │   │   ├── replacer.ts   # Core replacement engine
 │   │   ├── reporter.ts   # Output formatting
 │   │   └── watcher.ts    # File watching for --watch mode

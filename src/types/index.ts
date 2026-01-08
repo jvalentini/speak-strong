@@ -39,6 +39,10 @@ export interface CliOptions {
   debug?: boolean;
   interactive?: boolean;
   watch?: boolean;
+  history?: boolean;
+  historyLimit?: number;
+  undo?: string | boolean;
+  show?: string;
 }
 
 export type InteractiveAction = 'accept' | 'skip' | 'accept-all' | 'skip-all' | 'quit';
@@ -47,4 +51,22 @@ export interface InteractiveResult {
   accepted: Match[];
   skipped: Match[];
   quit: boolean;
+}
+
+export interface HistoryEntry {
+  id: string;
+  timestamp: string;
+  inputFile?: string;
+  inputMessage?: string;
+  outputFile?: string;
+  original: string;
+  transformed: string;
+  level: StrictnessLevel;
+  replacementCount: number;
+  suggestionCount: number;
+}
+
+export interface HistoryDatabase {
+  version: number;
+  entries: HistoryEntry[];
 }

@@ -269,3 +269,70 @@ describe('processText - real-world examples', () => {
     expect(result.transformed).toContain('I disagree with the color choice');
   });
 });
+
+describe('processText - formatting preservation', () => {
+  test('preserves newlines', () => {
+    const input = 'I think we should try.\n\nMaybe we can do this.';
+    const result = processText(input, 'conservative');
+    expect(result.transformed).toContain('\n\n');
+    expect(result.transformed.split('\n').length).toBe(3);
+  });
+
+  test('preserves line breaks in multi-line text', () => {
+    const input = `Subject: Proposal
+
+I just wanted to reach out.
+
+I think we should meet.`;
+    const result = processText(input, 'conservative');
+    expect(result.transformed).toContain('Subject: Proposal');
+    expect(result.transformed).toContain('\n\n');
+    expect(result.transformed.split('\n').length).toBeGreaterThan(1);
+  });
+
+  test('preserves tabs', () => {
+    const input = 'I think we should:\n\t- First item\n\t- Second item';
+    const result = processText(input, 'conservative');
+    expect(result.transformed).toContain('\t');
+    expect(result.transformed).toContain('\t- First item');
+  });
+
+  test('collapses multiple spaces within lines but preserves newlines', () => {
+    const input = 'I think  we  should  try.\n\nMaybe  we  can  do  this.';
+    const result = processText(input, 'conservative');
+    expect(result.transformed).not.toContain('  '); // Multiple spaces collapsed
+    expect(result.transformed).toContain('\n\n'); // Newlines preserved
+  });
+
+  test('preserves formatting in structured text', () => {
+    const input = `Proposed Approach:
+- I think we should start
+- Maybe we could do research
+
+Budget Estimate:
+I think the project would cost $10,000.`;
+    const result = processText(input, 'conservative');
+    expect(result.transformed).toContain('Proposed Approach:');
+    expect(result.transformed).toContain('Budget Estimate:');
+    expect(result.transformed).toContain('\n\n');
+    expect(result.transformed.split('\n').length).toBeGreaterThan(4);
+  });
+
+  test('preserves email formatting', () => {
+    const input = `Hi Sarah,
+
+I just wanted to follow up.
+
+I think we should meet.
+
+Best,
+John`;
+    const result = processText(input, 'conservative');
+    expect(result.transformed).toContain('Hi Sarah,');
+    expect(result.transformed).toContain('Best,');
+    expect(result.transformed).toContain('John');
+    // Should have multiple line breaks
+    const lineCount = result.transformed.split('\n').length;
+    expect(lineCount).toBeGreaterThan(4);
+  });
+});

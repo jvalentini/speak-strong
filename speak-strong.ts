@@ -1,6 +1,16 @@
 #!/usr/bin/env bun
 
 import {
+  createEntryFromResult,
+  formatEntryDetails,
+  formatHistoryList,
+  getEntries,
+  getEntry,
+  getLatestEntry,
+  saveEntry,
+  undoEntry,
+} from './src/lib/history.js';
+import {
   applyAcceptedReplacements,
   isInteractiveSupported,
   runInteractive,
@@ -14,7 +24,7 @@ import {
 } from './src/lib/reporter.js';
 import { watchFile } from './src/lib/watcher.js';
 import type { CliOptions, InteractiveResult, ProcessResult } from './src/types/index.js';
-import { dim, error, warning } from './src/utils/colors.js';
+import { dim, error, green, red, warning } from './src/utils/colors.js';
 import {
   ArgumentError,
   FileNotFoundError,
@@ -55,6 +65,12 @@ OPTIONS:
   -h, --help             Show this help message
   --version              Show version number
 
+HISTORY:
+  --history              Show recent transformation history
+  --history-limit <n>    Limit history entries shown (default: 10)
+  --undo [id]            Undo last transformation (or specific id)
+  --show <id>            Show details of a specific transformation
+
 EXAMPLES:
   speak-strong -m "I just wanted to check if maybe we could try this"
   speak-strong -f email.md -o email-strong.md
@@ -62,6 +78,8 @@ EXAMPLES:
   speak-strong -m "I think we should" --aggressive
   speak-strong -f email.txt -i              # Interactive mode
   speak-strong -f email.txt --watch         # Watch mode
+  speak-strong --history                    # View history
+  speak-strong --undo                       # Undo last change
 `);
 }
 
@@ -107,6 +125,29 @@ function parseArgs(args: string[]): CliOptions {
       case '--watch':
         options.watch = true;
         break;
+      case '--history':
+        options.history = true;
+        break;
+      case '--history-limit': {
+        const limit = Number.parseInt(args[++i], 10);
+        if (Number.isNaN(limit) || limit < 1) {
+          throw new ArgumentError('--history-limit must be a positive number');
+        }
+        options.historyLimit = limit;
+        break;
+      }
+      case '--undo': {
+        const nextArg = args[i + 1];
+        if (nextArg && !nextArg.startsWith('-')) {
+          options.undo = args[++i];
+        } else {
+          options.undo = true;
+        }
+        break;
+      }
+      case '--show':
+        options.show = args[++i];
+        break;
       case '--debug':
         options.debug = true;
         break;
@@ -130,7 +171,15 @@ function parseArgs(args: string[]): CliOptions {
   return options;
 }
 
+function isHistoryCommand(options: CliOptions): boolean {
+  return !!(options.history || options.undo || options.show);
+}
+
 function validateOptions(options: CliOptions): void {
+  if (isHistoryCommand(options)) {
+    return;
+  }
+
   if (!(options.file || options.message)) {
     throw new ArgumentError('Either --file or --message is required');
   }
@@ -222,6 +271,40 @@ async function main(): Promise<void> {
     Logger.verbose(`speak-strong v${VERSION}`);
     Logger.debug('Options:', JSON.stringify(options));
 
+    if (options.history) {
+      const entries = getEntries(options.historyLimit || 10);
+      console.log(formatHistoryList(entries));
+      return;
+    }
+
+    if (options.show) {
+      const entry = getEntry(options.show);
+      if (!entry) {
+        console.error(error(`Entry not found: ${options.show}`));
+        process.exit(1);
+      }
+      console.log(formatEntryDetails(entry));
+      return;
+    }
+
+    if (options.undo) {
+      const entry = typeof options.undo === 'string' ? getEntry(options.undo) : getLatestEntry();
+
+      if (!entry) {
+        console.error(error('No entry found to undo'));
+        process.exit(1);
+      }
+
+      const result = undoEntry(entry);
+      if (result.success) {
+        console.log(green(result.message));
+      } else {
+        console.error(red(result.message));
+        process.exit(1);
+      }
+      return;
+    }
+
     const level = getStrictnessLevel(options);
 
     if (options.watch && options.file) {
@@ -264,8 +347,30 @@ async function main(): Promise<void> {
       }
 
       outputResult(result, options, interactiveResult);
+
+      if (interactiveResult.accepted.length > 0) {
+        const entryData = createEntryFromResult(
+          {
+            ...result,
+            replacements: interactiveResult.accepted,
+            transformed: applyAcceptedReplacements(result.original, interactiveResult.accepted),
+          },
+          level,
+          { inputFile: options.file, inputMessage: options.message, outputFile: options.output }
+        );
+        saveEntry(entryData);
+      }
     } else {
       outputResult(result, options);
+
+      if (result.replacements.length > 0) {
+        const entryData = createEntryFromResult(result, level, {
+          inputFile: options.file,
+          inputMessage: options.message,
+          outputFile: options.output,
+        });
+        saveEntry(entryData);
+      }
     }
   } catch (err) {
     if (err instanceof ArgumentError) {
