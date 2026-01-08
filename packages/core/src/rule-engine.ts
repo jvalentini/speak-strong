@@ -1,5 +1,5 @@
-import type { StrictnessLevel } from '../types/index.js';
 import { getWordTokens, type Token, tokenize } from './tokenizer.js';
+import type { Rule, StrictnessLevel } from './types.js';
 
 export interface TokenPattern {
   /** Normalized token text to match (lowercase) */
@@ -386,5 +386,15 @@ export function processWithRules(text: string, rules: TokenRule[]): RuleEngineRe
     transformed,
     matches: replacements,
     suggestions,
+  };
+}
+
+export function tokenRuleToRule(tokenRule: TokenRule): Rule {
+  return {
+    pattern: tokenRule.pattern.map((p) => p.text).join(' '),
+    replacement: tokenRule.replacement?.join(' ') ?? null,
+    level: tokenRule.level,
+    category: tokenRule.category,
+    suggestion: tokenRule.suggestion,
   };
 }

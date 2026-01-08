@@ -5,7 +5,7 @@ import {
   tokenize,
   tokenSlice,
   tokensToText,
-} from '../src/lib/tokenizer.js';
+} from '@speak-strong/core';
 
 describe('tokenize', () => {
   test('tokenizes simple words', () => {

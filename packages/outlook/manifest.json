@@ -1,0 +1,134 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "version": "2.3.0",
+  "name": {
+    "short": "Speak Strong",
+    "full": "Speak Strong - Confident Email Communication"
+  },
+  "description": {
+    "short": "Transform weak language into confident communication",
+    "full": "Speak Strong analyzes your emails and helps you replace hedging, minimizing, and apologetic phrases with stronger, more confident language. Perfect for professional communication."
+  },
+  "developer": {
+    "name": "Justin Valentini",
+    "websiteUrl": "https://github.com/jvalentini/speak-strong",
+    "privacyUrl": "https://github.com/jvalentini/speak-strong/blob/main/PRIVACY.md",
+    "termsOfUseUrl": "https://github.com/jvalentini/speak-strong/blob/main/LICENSE"
+  },
+  "icons": {
+    "outline": "assets/icon-outline.png",
+    "color": "assets/icon-color.png"
+  },
+  "accentColor": "#0078D4",
+  "localizationInfo": {
+    "defaultLanguageTag": "en-US"
+  },
+  "authorization": {
+    "permissions": {
+      "resourceSpecific": [
+        {
+          "name": "Mailbox.ReadWrite.User",
+          "type": "Delegated"
+        }
+      ]
+    }
+  },
+  "extensions": [
+    {
+      "requirements": {
+        "scopes": ["mail"],
+        "capabilities": [
+          {
+            "name": "Mailbox",
+            "minVersion": "1.3"
+          }
+        ]
+      },
+      "runtimes": [
+        {
+          "requirements": {
+            "capabilities": [
+              {
+                "name": "Mailbox",
+                "minVersion": "1.3"
+              }
+            ]
+          },
+          "id": "TaskPaneRuntime",
+          "type": "general",
+          "code": {
+            "page": "https://localhost:3000/taskpane.html"
+          },
+          "lifetime": "short",
+          "actions": [
+            {
+              "id": "TaskPaneAction",
+              "type": "openPage",
+              "pinnable": true,
+              "view": "dashboard"
+            }
+          ]
+        }
+      ],
+      "ribbons": [
+        {
+          "contexts": ["mailCompose"],
+          "tabs": [
+            {
+              "builtInTabId": "TabDefault",
+              "groups": [
+                {
+                  "id": "SpeakStrongGroup",
+                  "label": "Speak Strong",
+                  "icons": [
+                    {
+                      "size": 16,
+                      "file": "assets/icon-16.png"
+                    },
+                    {
+                      "size": 32,
+                      "file": "assets/icon-32.png"
+                    },
+                    {
+                      "size": 80,
+                      "file": "assets/icon-80.png"
+                    }
+                  ],
+                  "controls": [
+                    {
+                      "id": "AnalyzeButton",
+                      "type": "button",
+                      "label": "Analyze",
+                      "tooltip": "Analyze email for weak language",
+                      "supertip": {
+                        "title": "Speak Strong",
+                        "description": "Scan your email for hedging, minimizing, and apologetic phrases and replace them with confident language."
+                      },
+                      "icons": [
+                        {
+                          "size": 16,
+                          "file": "assets/icon-16.png"
+                        },
+                        {
+                          "size": 32,
+                          "file": "assets/icon-32.png"
+                        },
+                        {
+                          "size": 80,
+                          "file": "assets/icon-80.png"
+                        }
+                      ],
+                      "actionId": "TaskPaneAction"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

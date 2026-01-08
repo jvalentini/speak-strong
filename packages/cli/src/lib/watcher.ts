@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { watch } from 'node:fs';
-import type { ProcessResult, StrictnessLevel } from '../types/index.js';
+import type { ProcessResult, StrictnessLevel } from '@speak-strong/core';
 import { bold, cyan, dim, green, yellow } from '../utils/colors.js';
 import { getConfig } from '../utils/config.js';
 import { readTextFile, writeTextFile } from '../utils/file.js';

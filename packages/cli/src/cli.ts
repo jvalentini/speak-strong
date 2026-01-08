@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import type { ProcessResult } from '@speak-strong/core';
 import {
   createEntryFromResult,
   formatEntryDetails,
@@ -9,32 +10,27 @@ import {
   getLatestEntry,
   saveEntry,
   undoEntry,
-} from './src/lib/history.js';
+} from './lib/history.js';
 import {
   applyAcceptedReplacements,
   isInteractiveSupported,
   runInteractive,
-} from './src/lib/interactive.js';
-import { getStrictnessLevel, processText } from './src/lib/replacer.js';
+} from './lib/interactive.js';
+import { getStrictnessLevel, processText } from './lib/replacer.js';
 import {
   formatInteractiveOutput,
   formatOutput,
   logInteractiveStats,
   logStats,
-} from './src/lib/reporter.js';
-import { watchFile } from './src/lib/watcher.js';
-import type { CliOptions, InteractiveResult, ProcessResult } from './src/types/index.js';
-import { dim, error, green, red, warning } from './src/utils/colors.js';
-import {
-  ArgumentError,
-  FileNotFoundError,
-  FileReadError,
-  FileWriteError,
-} from './src/utils/errors.js';
-import { readTextFile, writeTextFile } from './src/utils/file.js';
-import { Logger } from './src/utils/logger.js';
+} from './lib/reporter.js';
+import { watchFile } from './lib/watcher.js';
+import type { CliOptions, InteractiveResult } from './types.js';
+import { dim, error, green, red, warning } from './utils/colors.js';
+import { ArgumentError, FileNotFoundError, FileReadError, FileWriteError } from './utils/errors.js';
+import { readTextFile, writeTextFile } from './utils/file.js';
+import { Logger } from './utils/logger.js';
 
-const VERSION = '1.0.0';
+const VERSION = '2.3.0';
 
 function printHelp(): void {
   console.log(`

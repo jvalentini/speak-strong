@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speak Strong - Outlook Add-in</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      max-width: 600px;
+    }
+    h1 { font-size: 2.5rem; margin-bottom: 16px; }
+    p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 24px; line-height: 1.6; }
+    .status {
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+    .status h2 { font-size: 1rem; margin-bottom: 12px; opacity: 0.8; }
+    .check { color: #4ade80; }
+    a { color: white; }
+    code {
+      background: rgba(0,0,0,0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Speak Strong</h1>
+    <p>Transform weak language into confident communication.</p>
+    <p>This is the Outlook Add-in development server.</p>
+    
+    <div class="status">
+      <h2>Server Status</h2>
+      <p><span class="check">✓</span> Dev server running on port 3000</p>
+      <p><span class="check">✓</span> HTTPS enabled</p>
+    </div>
+    
+    <div class="status">
+      <h2>Quick Links</h2>
+      <p><a href="/taskpane.html">Task Pane Preview</a></p>
+      <p><a href="/commands.html">Commands Page</a></p>
+    </div>
+    
+    <div class="status">
+      <h2>Next Steps</h2>
+      <p>Sideload <code>manifest-dev.json</code> in Outlook to test the add-in.</p>
+    </div>
+  </div>
+</body>
+</html>

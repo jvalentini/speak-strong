@@ -1,12 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import type {
-  HistoryDatabase,
-  HistoryEntry,
-  ProcessResult,
-  StrictnessLevel,
-} from '../types/index.js';
+import type { ProcessResult, StrictnessLevel } from '@speak-strong/core';
+import type { HistoryDatabase, HistoryEntry } from '../types.js';
 import { bold, cyan, dim, green, red, yellow } from '../utils/colors.js';
 import { getConfig } from '../utils/config.js';
 import { writeTextFile } from '../utils/file.js';

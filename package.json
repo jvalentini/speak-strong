@@ -1,12 +1,12 @@
 {
-  "name": "speak-strong",
+  "name": "speak-strong-monorepo",
   "version": "2.3.0",
-  "description": "CLI tool to transform weak language into strong, confident communication",
+  "private": true,
+  "description": "Monorepo for Speak Strong - transform weak language into confident communication",
   "type": "module",
-  "main": "dist/speak-strong.js",
-  "bin": {
-    "speak-strong": "./dist/speak-strong.js"
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/jvalentini/speak-strong.git"
@@ -15,31 +15,24 @@
   "bugs": {
     "url": "https://github.com/jvalentini/speak-strong/issues"
   },
-  "files": [
-    "dist/",
-    "README.md",
-    "LICENSE"
-  ],
   "scripts": {
-    "dev": "bun run speak-strong.ts",
-    "build": "tsc",
-    "build:binaries": "bun run build:darwin-arm64 && bun run build:darwin-x64 && bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:windows-x64",
-    "build:darwin-arm64": "bun build speak-strong.ts --compile --target=bun-darwin-arm64 --outfile=dist/speak-strong-darwin-arm64",
-    "build:darwin-x64": "bun build speak-strong.ts --compile --target=bun-darwin-x64 --outfile=dist/speak-strong-darwin-x64",
-    "build:linux-x64": "bun build speak-strong.ts --compile --target=bun-linux-x64 --outfile=dist/speak-strong-linux-x64",
-    "build:linux-arm64": "bun build speak-strong.ts --compile --target=bun-linux-arm64 --outfile=dist/speak-strong-linux-arm64",
-    "build:windows-x64": "bun build speak-strong.ts --compile --target=bun-windows-x64 --outfile=dist/speak-strong-windows-x64.exe",
-    "test": "bun test",
-    "test:coverage": "bun test --coverage",
-    "test:coverage:report": "bun test --coverage --coverage-reporter=lcov --coverage-reporter=text",
+    "dev": "bun run --cwd packages/cli dev",
+    "build": "bun run build:core && bun run build:cli",
+    "build:core": "bun run --cwd packages/core build",
+    "build:cli": "bun run --cwd packages/cli build",
+    "build:outlook": "bun run --cwd packages/outlook build",
+    "build:binaries": "bun run --cwd packages/cli build:binaries",
+    "test": "bun run --cwd packages/cli test",
+    "test:coverage": "bun run --cwd packages/cli test:coverage",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
     "oxlint": "oxlint .",
-    "typecheck": "bunx tsc --noEmit",
+    "typecheck": "bun run typecheck:core && bun run typecheck:cli",
+    "typecheck:core": "bun run --cwd packages/core typecheck",
+    "typecheck:cli": "bun run --cwd packages/cli typecheck",
     "check": "bun run typecheck && bun run lint && bun run oxlint",
-    "check:all": "bun run check && bun run test:coverage",
-    "prepublishOnly": "bun test && bun run build"
+    "check:all": "bun run check && bun run test:coverage"
   },
   "keywords": [
     "cli",
@@ -48,7 +41,9 @@
     "writing",
     "confidence",
     "text-processing",
-    "typescript"
+    "typescript",
+    "outlook",
+    "office-addin"
   ],
   "author": "Justin Valentini",
   "license": "ISC",
@@ -62,8 +57,5 @@
     "lefthook": "^2.0.13",
     "oxlint": "^1.38.0",
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "zod": "^4.3.5"
   }
 }

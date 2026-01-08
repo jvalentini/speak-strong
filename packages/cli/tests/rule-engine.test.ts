@@ -5,7 +5,7 @@ import {
   convertRuleEntry,
   findMatches,
   processWithRules,
-} from '../src/lib/rule-engine.js';
+} from '../../../packages/core/src/rule-engine.js';
 
 describe('convertLegacyRule', () => {
   test('converts pattern to token sequence', () => {
