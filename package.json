@@ -1,0 +1,48 @@
+{
+  "name": "speak-strong",
+  "version": "1.0.0",
+  "description": "CLI tool to transform weak language into strong, confident communication",
+  "type": "module",
+  "main": "dist/speak-strong.js",
+  "bin": {
+    "speak-strong": "./dist/speak-strong.js"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "bun run speak-strong.ts",
+    "build": "tsc",
+    "test": "bun test",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "oxlint": "oxlint .",
+    "typecheck": "bunx tsc --noEmit",
+    "check": "bun run typecheck && bun run lint && bun run oxlint",
+    "prepublishOnly": "bun test && bun run build"
+  },
+  "keywords": [
+    "cli",
+    "language",
+    "communication",
+    "writing",
+    "confidence",
+    "text-processing",
+    "typescript"
+  ],
+  "author": "Justin Valentini",
+  "license": "ISC",
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.11",
+    "@types/node": "^20.0.0",
+    "bun-types": "latest",
+    "oxlint": "^1.38.0",
+    "typescript": "^5.0.0"
+  }
+}

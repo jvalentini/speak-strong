@@ -1,0 +1,303 @@
+{
+  "version": "1.0.0",
+  "rules": [
+    {
+      "pattern": "I think we should",
+      "replacement": "We should",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "I think this",
+      "replacement": "This",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "I think that",
+      "replacement": "I believe that",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "I think",
+      "replacement": "I believe",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "I feel like we should",
+      "replacement": "We should",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "I feel like",
+      "replacement": "I believe",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "maybe we should",
+      "replacement": "we should",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "maybe we could",
+      "replacement": "we could",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "I'm not sure, but",
+      "replacement": "",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "I'm not positive, but",
+      "replacement": "",
+      "level": "conservative",
+      "category": "hedging"
+    },
+    {
+      "pattern": "I just wanted to",
+      "replacement": "I wanted to",
+      "level": "conservative",
+      "category": "minimizing"
+    },
+    {
+      "pattern": "I just want to",
+      "replacement": "I want to",
+      "level": "conservative",
+      "category": "minimizing"
+    },
+    {
+      "pattern": "just a quick",
+      "replacement": "a quick",
+      "level": "conservative",
+      "category": "minimizing"
+    },
+    {
+      "pattern": "just a small",
+      "replacement": "a",
+      "level": "conservative",
+      "category": "minimizing"
+    },
+    {
+      "pattern": "I only have a",
+      "replacement": "I have a",
+      "level": "conservative",
+      "category": "minimizing"
+    },
+    {
+      "pattern": "sorry to bother you",
+      "replacement": "excuse me",
+      "level": "conservative",
+      "category": "apologizing"
+    },
+    {
+      "pattern": "sorry to bother",
+      "replacement": "excuse me",
+      "level": "conservative",
+      "category": "apologizing"
+    },
+    {
+      "pattern": "I'm sorry, but I disagree",
+      "replacement": "I disagree",
+      "level": "conservative",
+      "category": "apologizing"
+    },
+    {
+      "pattern": "I'm sorry, but",
+      "replacement": "",
+      "level": "conservative",
+      "category": "apologizing"
+    },
+    {
+      "pattern": "sorry, but",
+      "replacement": "",
+      "level": "conservative",
+      "category": "apologizing"
+    },
+    {
+      "pattern": "I'll try to get that done",
+      "replacement": "I will get that done",
+      "level": "conservative",
+      "category": "non-committal"
+    },
+    {
+      "pattern": "I'll try to",
+      "replacement": "I will",
+      "level": "conservative",
+      "category": "non-committal"
+    },
+    {
+      "pattern": "hopefully we can",
+      "replacement": "we will",
+      "level": "conservative",
+      "category": "non-committal"
+    },
+    {
+      "pattern": "hopefully I can",
+      "replacement": "I will",
+      "level": "conservative",
+      "category": "non-committal"
+    },
+    {
+      "pattern": "does that make sense",
+      "replacement": "let me know if you have questions",
+      "level": "conservative",
+      "category": "approval-seeking"
+    },
+    {
+      "pattern": "if you know what I mean",
+      "replacement": "",
+      "level": "conservative",
+      "category": "approval-seeking"
+    },
+    {
+      "pattern": "know what I mean",
+      "replacement": "",
+      "level": "conservative",
+      "category": "approval-seeking"
+    },
+    {
+      "pattern": "this is probably not important, but",
+      "replacement": "",
+      "level": "moderate",
+      "category": "minimizing"
+    },
+    {
+      "pattern": "this might be a stupid question, but",
+      "replacement": "",
+      "level": "moderate",
+      "category": "minimizing"
+    },
+    {
+      "pattern": "I'm no expert, but",
+      "replacement": "",
+      "level": "moderate",
+      "category": "minimizing"
+    },
+    {
+      "pattern": "kind of",
+      "replacement": "",
+      "level": "moderate",
+      "category": "filler"
+    },
+    {
+      "pattern": "sort of",
+      "replacement": "",
+      "level": "moderate",
+      "category": "filler"
+    },
+    {
+      "pattern": "I guess",
+      "replacement": "",
+      "level": "moderate",
+      "category": "hedging"
+    },
+    {
+      "pattern": "I suppose",
+      "replacement": "",
+      "level": "moderate",
+      "category": "hedging"
+    },
+    {
+      "pattern": "would you mind if",
+      "replacement": "I'd like to",
+      "level": "moderate",
+      "category": "weak-request"
+    },
+    {
+      "pattern": "I was wondering if you could",
+      "replacement": "could you",
+      "level": "moderate",
+      "category": "weak-request"
+    },
+    {
+      "pattern": "if it's not too much trouble",
+      "replacement": "",
+      "level": "moderate",
+      "category": "weak-request"
+    },
+    {
+      "pattern": "I hate to ask, but",
+      "replacement": "",
+      "level": "moderate",
+      "category": "apologizing"
+    },
+    {
+      "pattern": "in my opinion",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing - your opinion is implied when you speak"
+    },
+    {
+      "pattern": "I would argue that",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing - just state your argument directly"
+    },
+    {
+      "pattern": "for what it's worth",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing - undermines your point before you make it"
+    },
+    {
+      "pattern": "needless to say",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing - if needless, don't say it"
+    },
+    {
+      "pattern": "to be honest",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing - implies you're not always honest"
+    },
+    {
+      "pattern": "to be frank",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing - implies you're not always frank"
+    },
+    {
+      "pattern": "basically",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing - often adds no meaning"
+    },
+    {
+      "pattern": "actually",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing unless emphasizing genuine contrast"
+    },
+    {
+      "pattern": "literally",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing unless something is truly literal"
+    },
+    {
+      "pattern": "it's important to note that",
+      "replacement": null,
+      "level": "aggressive",
+      "category": "filler",
+      "suggestion": "Consider removing - just note the important thing directly"
+    }
+  ]
+}

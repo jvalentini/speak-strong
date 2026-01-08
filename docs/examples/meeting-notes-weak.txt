@@ -1,0 +1,27 @@
+Project Status Meeting - December 15
+
+Attendees: Marketing, Engineering, Design
+
+Discussion Points:
+
+1. Q1 Launch Timeline
+   - I think we should maybe push the launch to February
+   - I feel like the current timeline is kind of aggressive
+   - I'm not sure, but I think we need 2 more sprints
+
+2. Budget Concerns
+   - I was wondering if we could revisit the marketing budget
+   - Sorry to bring this up, but I disagree with the allocation
+   - I'll try to prepare a revised proposal by next week
+
+3. Design Review
+   - The mockups are just a rough draft at this point
+   - I only have a few suggestions, if that's okay
+   - Does that make sense to everyone?
+
+Action Items:
+- Alex: I'll try to finish the competitor analysis
+- Jordan: Hopefully can get the prototype ready
+- Sam: Maybe schedule follow-up with stakeholders
+
+Next meeting: TBD (sorry, I forgot to book the room)
