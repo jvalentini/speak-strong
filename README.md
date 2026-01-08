@@ -1,6 +1,21 @@
 # Speak Strong
 
+<div align="center">
+
 ![Speak Strong Banner](2026-01-08-11-08-speak-strong-banner.png)
+
+[![CI](https://github.com/jvalentini/speak-strong/actions/workflows/ci.yml/badge.svg)](https://github.com/jvalentini/speak-strong/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-1.0-black?logo=bun&logoColor=white)](https://bun.sh/)
+[![ISC License](https://img.shields.io/badge/License-ISC-blue.svg)](https://github.com/jvalentini/speak-strong/blob/main/LICENSE)
+[![GitHub Release](https://img.shields.io/github/v/release/jvalentini/speak-strong)](https://github.com/jvalentini/speak-strong/releases)
+[![GitHub Stars](https://img.shields.io/github/stars/jvalentini/speak-strong?style=flat)](https://github.com/jvalentini/speak-strong)
+
+[![macOS](https://img.shields.io/badge/macOS-supported-brightgreen?logo=apple)](https://github.com/jvalentini/speak-strong/releases)
+[![Linux](https://img.shields.io/badge/Linux-supported-brightgreen?logo=linux&logoColor=white)](https://github.com/jvalentini/speak-strong/releases)
+[![Windows](https://img.shields.io/badge/Windows-supported-brightgreen?logo=windows)](https://github.com/jvalentini/speak-strong/releases)
+
+</div>
 
 A CLI tool that transforms weak, hesitant language into strong, confident communication.
 
