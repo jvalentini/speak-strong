@@ -1,11 +1,19 @@
 {
   "name": "speak-strong",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "CLI tool to transform weak language into strong, confident communication",
   "type": "module",
   "main": "dist/speak-strong.js",
   "bin": {
     "speak-strong": "./dist/speak-strong.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jvalentini/speak-strong.git"
+  },
+  "homepage": "https://github.com/jvalentini/speak-strong#readme",
+  "bugs": {
+    "url": "https://github.com/jvalentini/speak-strong/issues"
   },
   "files": [
     "dist/",
@@ -42,6 +50,7 @@
     "@biomejs/biome": "^2.3.11",
     "@types/node": "^20.0.0",
     "bun-types": "latest",
+    "lefthook": "^2.0.13",
     "oxlint": "^1.38.0",
     "typescript": "^5.0.0"
   }

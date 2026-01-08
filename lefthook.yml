@@ -1,0 +1,21 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{ts,json}"
+      run: bunx biome check --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+
+    oxlint:
+      glob: "*.ts"
+      run: bunx oxlint {staged_files}
+
+pre-push:
+  commands:
+    typecheck:
+      glob: "*.ts"
+      run: bunx tsc --noEmit
+
+    test:
+      glob: "*.ts"
+      run: bun test

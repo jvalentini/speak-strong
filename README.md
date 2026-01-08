@@ -58,7 +58,7 @@ Speak Strong requires [Bun](https://bun.sh) to run.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/speak-strong.git
+git clone https://github.com/jvalentini/speak-strong.git
 cd speak-strong
 
 # Install dependencies
