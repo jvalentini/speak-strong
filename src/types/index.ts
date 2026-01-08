@@ -37,4 +37,13 @@ export interface CliOptions {
   verbose?: boolean;
   quiet?: boolean;
   debug?: boolean;
+  interactive?: boolean;
+}
+
+export type InteractiveAction = 'accept' | 'skip' | 'accept-all' | 'skip-all' | 'quit';
+
+export interface InteractiveResult {
+  accepted: Match[];
+  skipped: Match[];
+  quit: boolean;
 }

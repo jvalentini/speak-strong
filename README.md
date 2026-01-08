@@ -114,6 +114,39 @@ speak-strong -m "I kind of think we should try" --moderate
 speak-strong -m "Basically, in my opinion, we should try" --aggressive
 ```
 
+### Interactive Mode
+
+Review each replacement before applying:
+
+```bash
+speak-strong -f email.txt -i
+speak-strong -m "I just think we should try" --interactive
+```
+
+In interactive mode, you'll see each potential replacement and can choose:
+- `a` - Accept this replacement
+- `s` - Skip this replacement  
+- `A` - Accept all remaining replacements
+- `S` - Skip all remaining replacements
+- `q` - Quit without applying changes
+
+```
+[1/3] [minimizing]
+  I just wanted to → I wanted to
+
+  accept / skip / Accept all / Skip all / quit ? a
+
+[2/3] [hedging]
+  I think we should → We should
+
+  accept / skip / Accept all / Skip all / quit ? s
+
+── Result ────────────────────────────────────────
+I wanted to check if I think we should try this.
+
+── Stats: 1 accepted, 1 skipped ──
+```
+
 ### Verbosity Options
 
 ```bash
@@ -201,6 +234,7 @@ speak-strong/
 ├── speak-strong.ts       # CLI entry point
 ├── src/
 │   ├── lib/
+│   │   ├── interactive.ts # Interactive mode prompts
 │   │   ├── replacer.ts   # Core replacement engine
 │   │   └── reporter.ts   # Output formatting
 │   ├── types/

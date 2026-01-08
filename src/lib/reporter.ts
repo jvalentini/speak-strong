@@ -1,6 +1,6 @@
-import type { Match, ProcessResult } from '../types/index.js';
+import type { InteractiveResult, Match, ProcessResult } from '../types/index.js';
 import { bold, cyan, dim, green, magenta, red, strikethrough, yellow } from '../utils/colors.js';
-import { Logger } from '../utils/logger.js';
+import { applyAcceptedReplacements } from './interactive.js';
 
 function formatReplacement(match: Match): string {
   const arrow = dim('->');
@@ -71,7 +71,7 @@ export function logStats(result: ProcessResult): void {
   const sugCount = result.suggestions.length;
 
   if (repCount === 0 && sugCount === 0) {
-    Logger.info(green('No weak language detected'));
+    console.error(green('No weak language detected'));
     return;
   }
 
@@ -83,5 +83,72 @@ export function logStats(result: ProcessResult): void {
     parts.push(`${sugCount} suggestion${sugCount === 1 ? '' : 's'}`);
   }
 
-  Logger.info(dim(`── Stats: ${parts.join(', ')} ──`));
+  console.error(dim(`── Stats: ${parts.join(', ')} ──`));
+}
+
+export function formatInteractiveOutput(
+  result: ProcessResult,
+  interactiveResult: InteractiveResult,
+  showDiff: boolean
+): string {
+  const lines: string[] = [];
+  const transformed = applyAcceptedReplacements(result.original, interactiveResult.accepted);
+
+  if (showDiff && interactiveResult.accepted.length > 0) {
+    lines.push('');
+    lines.push(bold(green('── Result ────────────────────────────────────────')));
+  }
+
+  lines.push(transformed);
+
+  return lines.join('\n');
+}
+
+export function logInteractiveStats(
+  interactiveResult: InteractiveResult,
+  suggestions: Match[],
+  showSuggestions?: boolean
+): void {
+  const acceptedCount = interactiveResult.accepted.length;
+  const skippedCount = interactiveResult.skipped.length;
+
+  if (showSuggestions && suggestions.length > 0) {
+    console.error('');
+    console.error(bold(yellow('── Suggestions (manual review) ───────────────────')));
+
+    const grouped = new Map<string, Match[]>();
+    for (const match of suggestions) {
+      const category = match.rule.category;
+      const existing = grouped.get(category) || [];
+      existing.push(match);
+      grouped.set(category, existing);
+    }
+
+    for (const [category, matches] of grouped) {
+      console.error(dim(`  [${category}]`));
+      for (const match of matches) {
+        const bullet = yellow('!');
+        const phrase = cyan(`"${match.original}"`);
+        const hint = match.rule.suggestion || 'Consider revising';
+        console.error(`  ${bullet} ${phrase}: ${dim(hint)}`);
+      }
+    }
+  }
+
+  const parts: string[] = [];
+  if (acceptedCount > 0) {
+    parts.push(green(`${acceptedCount} accepted`));
+  }
+  if (skippedCount > 0) {
+    parts.push(yellow(`${skippedCount} skipped`));
+  }
+  if (suggestions.length > 0 && showSuggestions) {
+    parts.push(cyan(`${suggestions.length} suggestion${suggestions.length === 1 ? '' : 's'}`));
+  }
+
+  if (parts.length > 0) {
+    console.error(dim(`\n── Stats: ${parts.join(', ')} ──`));
+  } else {
+    console.error(green('\nNo changes made'));
+  }
 }
