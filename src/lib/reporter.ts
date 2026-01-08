@@ -9,6 +9,14 @@ function formatReplacement(match: Match): string {
   return `  ${original} ${arrow} ${replacement}`;
 }
 
+function formatSkippedReplacement(match: Match): string {
+  const arrow = dim('->');
+  const original = yellow(match.original);
+  const replacement = dim(match.replacement || '(removed)');
+  const skipped = dim('(skipped)');
+  return `  ${original} ${arrow} ${replacement} ${skipped}`;
+}
+
 function formatSuggestion(match: Match): string {
   const bullet = yellow('!');
   const phrase = cyan(`"${match.original}"`);
@@ -94,16 +102,32 @@ export function formatInteractiveOutput(
   const lines: string[] = [];
   const transformed = applyAcceptedReplacements(result.original, interactiveResult.accepted);
 
-  if (showDiff && interactiveResult.accepted.length > 0) {
-    // Show replacements section like non-interactive mode
-    lines.push('');
-    lines.push(bold(magenta('── Replacements ──────────────────────────────────')));
+  if (showDiff && (interactiveResult.accepted.length > 0 || interactiveResult.skipped.length > 0)) {
+    // Show accepted replacements section
+    if (interactiveResult.accepted.length > 0) {
+      lines.push('');
+      lines.push(bold(magenta('── Replacements ──────────────────────────────────')));
 
-    const grouped = groupByCategory(interactiveResult.accepted);
-    for (const [category, matches] of grouped) {
-      lines.push(dim(`  [${category}]`));
-      for (const match of matches) {
-        lines.push(formatReplacement(match));
+      const grouped = groupByCategory(interactiveResult.accepted);
+      for (const [category, matches] of grouped) {
+        lines.push(dim(`  [${category}]`));
+        for (const match of matches) {
+          lines.push(formatReplacement(match));
+        }
+      }
+    }
+
+    // Show skipped replacements section
+    if (interactiveResult.skipped.length > 0) {
+      lines.push('');
+      lines.push(bold(yellow('── Skipped ───────────────────────────────────────')));
+
+      const grouped = groupByCategory(interactiveResult.skipped);
+      for (const [category, matches] of grouped) {
+        lines.push(dim(`  [${category}]`));
+        for (const match of matches) {
+          lines.push(formatSkippedReplacement(match));
+        }
       }
     }
 
