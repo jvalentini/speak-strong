@@ -95,6 +95,18 @@ export function formatInteractiveOutput(
   const transformed = applyAcceptedReplacements(result.original, interactiveResult.accepted);
 
   if (showDiff && interactiveResult.accepted.length > 0) {
+    // Show replacements section like non-interactive mode
+    lines.push('');
+    lines.push(bold(magenta('── Replacements ──────────────────────────────────')));
+
+    const grouped = groupByCategory(interactiveResult.accepted);
+    for (const [category, matches] of grouped) {
+      lines.push(dim(`  [${category}]`));
+      for (const match of matches) {
+        lines.push(formatReplacement(match));
+      }
+    }
+
     lines.push('');
     lines.push(bold(green('── Result ────────────────────────────────────────')));
   }
