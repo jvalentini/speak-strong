@@ -1,6 +1,6 @@
 {
   "name": "speak-strong",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "CLI tool to transform weak language into strong, confident communication",
   "type": "module",
   "main": "dist/speak-strong.js",
