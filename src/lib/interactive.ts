@@ -36,11 +36,11 @@ function formatMatch(match: Match, index: number, total: number): string {
 }
 
 function formatPrompt(): string {
-  const accept = `${bold('a')}ccept`;
-  const skip = `${bold('s')}kip`;
-  const acceptAll = `${bold('A')}ccept all`;
-  const skipAll = `${bold('S')}kip all`;
-  const quit = `${bold('q')}uit`;
+  const accept = `${green(bold(`[a]`))}ccept`;
+  const skip = `${yellow(bold(`[s]`))}kip`;
+  const acceptAll = `${green(bold(`[A]`))}ccept all`;
+  const skipAll = `${yellow(bold(`[S]`))}kip all`;
+  const quit = `${red(bold(`[q]`))}uit`;
 
   return `\n  ${accept} / ${skip} / ${acceptAll} / ${skipAll} / ${quit} ? `;
 }
