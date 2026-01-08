@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const TEST_DIR = join(tmpdir(), `speak-strong-test-${Date.now()}`);
+const TEST_DIR = join(tmpdir(), `speak-strong-test-${Date.now().toString()}`);
 const ORIGINAL_HOME = process.env.HOME;
 
 beforeEach(() => {

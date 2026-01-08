@@ -1,0 +1,11 @@
+{
+  "history": {
+    "maxEntries": 100
+  },
+  "watcher": {
+    "debounceMs": 300
+  },
+  "rules": {
+    "cacheEnabled": true
+  }
+}

@@ -122,6 +122,16 @@ test-watch:
 	@echo "Starting tests in watch mode..."
 	@bun test --watch
 
+.PHONY: test-coverage
+test-coverage:
+	@echo "Running tests with coverage..."
+	@bun test --coverage
+
+.PHONY: test-coverage-report
+test-coverage-report:
+	@echo "Running tests with detailed coverage report..."
+	@bun test --coverage --coverage-reporter=lcov --coverage-reporter=text
+
 # ============================================
 # Version Bump Commands
 # ============================================

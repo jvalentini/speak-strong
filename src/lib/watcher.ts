@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { watch } from 'node:fs';
 import type { ProcessResult, StrictnessLevel } from '../types/index.js';
 import { bold, cyan, dim, green, yellow } from '../utils/colors.js';
+import { getConfig } from '../utils/config.js';
 import { readTextFile, writeTextFile } from '../utils/file.js';
 import { processText } from './replacer.js';
 
@@ -91,7 +92,8 @@ export function watchFile(options: WatchOptions): { stop: () => void } {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
-    debounceTimer = setTimeout(processFile, 300);
+    const debounceMs = getConfig().watcher.debounceMs;
+    debounceTimer = setTimeout(processFile, debounceMs);
   };
 
   console.error(bold(`\nWatching: ${options.file}`));
