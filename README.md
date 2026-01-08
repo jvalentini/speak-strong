@@ -54,17 +54,30 @@ questions?
 
 ## Installation
 
-Speak Strong requires [Bun](https://bun.sh) to run.
+### Quick Install (Recommended)
 
 ```bash
-# Clone the repository
+curl -fsSL https://raw.githubusercontent.com/jvalentini/speak-strong/main/install.sh | bash
+```
+
+This downloads a prebuilt binary to `~/.local/bin`. Options:
+
+```bash
+# Install a specific version
+SPEAK_STRONG_VERSION=2.0.0 curl -fsSL https://raw.githubusercontent.com/jvalentini/speak-strong/main/install.sh | bash
+
+# Install to a custom directory
+SPEAK_STRONG_INSTALL=/usr/local/bin curl -fsSL https://raw.githubusercontent.com/jvalentini/speak-strong/main/install.sh | bash
+```
+
+### From Source
+
+Requires [Bun](https://bun.sh).
+
+```bash
 git clone https://github.com/jvalentini/speak-strong.git
 cd speak-strong
-
-# Install dependencies
 bun install
-
-# Run directly
 bun run speak-strong.ts --help
 ```
 

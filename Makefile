@@ -41,6 +41,10 @@ help:
 	@echo "  make test           - Run all tests"
 	@echo "  make test-watch     - Run tests in watch mode"
 	@echo ""
+	@echo "BUILD:"
+	@echo "  make build-binary   - Build binary for current platform"
+	@echo "  make build-all      - Build binaries for all platforms"
+	@echo ""
 	@echo "RELEASE:"
 	@echo "  make bump-patch     - Bump patch version (0.1.0 -> 0.1.1)"
 	@echo "  make bump-minor     - Bump minor version (0.1.0 -> 0.2.0)"
@@ -214,7 +218,29 @@ clean:
 	@rm -rf node_modules
 	@rm -rf dist
 	@rm -f bun.lockb
+	@rm -f speak-strong-*
 	@echo "Clean complete!"
+
+# ============================================
+# Binary Build Commands
+# ============================================
+
+.PHONY: build-binary
+build-binary:
+	@echo "Building binary for current platform..."
+	@bun build speak-strong.ts --compile --outfile speak-strong
+	@echo "Binary built: ./speak-strong"
+
+.PHONY: build-all
+build-all:
+	@echo "Building binaries for all platforms..."
+	@bun build speak-strong.ts --compile --target=bun-linux-x64 --outfile speak-strong-linux-x64
+	@bun build speak-strong.ts --compile --target=bun-linux-arm64 --outfile speak-strong-linux-arm64
+	@bun build speak-strong.ts --compile --target=bun-darwin-x64 --outfile speak-strong-darwin-x64
+	@bun build speak-strong.ts --compile --target=bun-darwin-arm64 --outfile speak-strong-darwin-arm64
+	@bun build speak-strong.ts --compile --target=bun-windows-x64 --outfile speak-strong-windows-x64.exe
+	@echo "All binaries built!"
+	@ls -la speak-strong-*
 
 # ============================================
 # Utility Commands
