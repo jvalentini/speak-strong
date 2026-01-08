@@ -1,16 +1,27 @@
 export type StrictnessLevel = 'conservative' | 'moderate' | 'aggressive';
 
+export interface RuleEntry {
+  pattern: string;
+  replacement?: string;
+  category: string;
+  suggestion?: string;
+  restructure?: boolean;
+}
+
 export interface Rule {
   pattern: string;
   replacement: string | null;
   level: StrictnessLevel;
   category: string;
   suggestion?: string;
+  restructure?: boolean;
 }
 
 export interface RulesDatabase {
   version: string;
-  rules: Rule[];
+  conservative: RuleEntry[];
+  moderate: RuleEntry[];
+  aggressive: RuleEntry[];
 }
 
 export interface Match {

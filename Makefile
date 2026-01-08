@@ -157,8 +157,19 @@ bump-major:
 # Release Commands
 # ============================================
 
+# Check if we're on main branch before allowing releases
+.PHONY: check-main-branch
+check-main-branch:
+	@CURRENT_BRANCH=$$(git branch --show-current 2>/dev/null || git rev-parse --abbrev-ref HEAD); \
+	if [ "$$CURRENT_BRANCH" != "main" ]; then \
+		echo "Error: Releases can only be created on the main branch."; \
+		echo "Current branch: $$CURRENT_BRANCH"; \
+		echo "Please switch to main branch first: git checkout main"; \
+		exit 1; \
+	fi
+
 .PHONY: release
-release:
+release: check-main-branch
 	@echo "Creating GitHub release for v$(VERSION)..."
 	@git tag -a "v$(VERSION)" -m "Release v$(VERSION)" 2>/dev/null || echo "Tag v$(VERSION) already exists"
 	@git push origin "v$(VERSION)" 2>/dev/null || echo "Tag already pushed"
@@ -169,17 +180,17 @@ release:
 	@echo "Release v$(VERSION) created!"
 
 .PHONY: release-patch
-release-patch: bump-patch
+release-patch: check-main-branch bump-patch
 	@git push
 	@$(MAKE) release
 
 .PHONY: release-minor
-release-minor: bump-minor
+release-minor: check-main-branch bump-minor
 	@git push
 	@$(MAKE) release
 
 .PHONY: release-major
-release-major: bump-major
+release-major: check-main-branch bump-major
 	@git push
 	@$(MAKE) release
 
