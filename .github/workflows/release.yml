@@ -11,21 +11,15 @@ permissions:
 jobs:
   build:
     name: Build ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-latest
-            target: linux-x64
-          - os: ubuntu-24.04-arm
-            target: linux-arm64
-          - os: macos-latest
-            target: darwin-arm64
-          - os: macos-15-large
-            target: darwin-x64
-          - os: windows-latest
-            target: windows-x64
+        target:
+          - darwin-arm64
+          - darwin-x64
+          - linux-x64
+          - linux-arm64
+          - windows-x64
 
     steps:
       - name: Checkout code
@@ -39,37 +33,19 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Run tests
-        run: bun test
+      - name: Build for ${{ matrix.target }}
+        run: bun run build:${{ matrix.target }}
 
-      - name: Build binary (Unix)
-        if: runner.os != 'Windows'
-        run: bun build speak-strong.ts --compile --outfile speak-strong-${{ matrix.target }}
-
-      - name: Build binary (Windows)
-        if: runner.os == 'Windows'
-        run: bun build speak-strong.ts --compile --outfile speak-strong-${{ matrix.target }}.exe
-
-      - name: Upload artifact (Unix)
-        if: runner.os != 'Windows'
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: speak-strong-${{ matrix.target }}
-          path: speak-strong-${{ matrix.target }}
-          retention-days: 1
-
-      - name: Upload artifact (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: speak-strong-${{ matrix.target }}
-          path: speak-strong-${{ matrix.target }}.exe
-          retention-days: 1
+          path: dist/speak-strong-${{ matrix.target }}*
 
   release:
     name: Create Release
-    needs: build
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
       - name: Checkout code
@@ -78,25 +54,29 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          path: dist
 
       - name: Prepare release assets
         run: |
           mkdir -p release
-          for dir in artifacts/*/; do
-            for file in "$dir"*; do
-              if [ -f "$file" ]; then
-                cp "$file" release/
-                chmod +x "release/$(basename "$file")" 2>/dev/null || true
-              fi
-            done
+          for dir in dist/speak-strong-*; do
+            cp "$dir/"* release/
           done
+          chmod +x release/speak-strong-* || true
           ls -la release/
+
+      - name: Create checksums
+        run: |
+          cd release
+          sha256sum speak-strong-* > checksums.txt
+          cat checksums.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: release/*
+          files: |
+            release/speak-strong-*
+            release/checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

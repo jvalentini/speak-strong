@@ -234,13 +234,9 @@ build-binary:
 .PHONY: build-all
 build-all:
 	@echo "Building binaries for all platforms..."
-	@bun build speak-strong.ts --compile --target=bun-linux-x64 --outfile speak-strong-linux-x64
-	@bun build speak-strong.ts --compile --target=bun-linux-arm64 --outfile speak-strong-linux-arm64
-	@bun build speak-strong.ts --compile --target=bun-darwin-x64 --outfile speak-strong-darwin-x64
-	@bun build speak-strong.ts --compile --target=bun-darwin-arm64 --outfile speak-strong-darwin-arm64
-	@bun build speak-strong.ts --compile --target=bun-windows-x64 --outfile speak-strong-windows-x64.exe
+	@bun run build:binaries
 	@echo "All binaries built!"
-	@ls -la speak-strong-*
+	@ls -la dist/speak-strong-*
 
 # ============================================
 # Utility Commands
