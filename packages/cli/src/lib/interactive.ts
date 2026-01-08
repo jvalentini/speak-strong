@@ -1,4 +1,5 @@
-import type { InteractiveAction, InteractiveResult, Match, ProcessResult } from '../types/index.js';
+import type { ProcessResult } from '@speak-strong/core';
+import type { InteractiveAction, InteractiveResult, Match } from '../types.js';
 import { bold, cyan, dim, green, red, yellow } from '../utils/colors.js';
 
 function enableRawMode(): void {

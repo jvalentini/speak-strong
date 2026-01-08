@@ -1,4 +1,5 @@
-import type { InteractiveResult, Match, ProcessResult } from '../types/index.js';
+import type { ProcessResult } from '@speak-strong/core';
+import type { InteractiveResult, Match } from '../types.js';
 import { bold, cyan, dim, green, magenta, red, strikethrough, yellow } from '../utils/colors.js';
 import { applyAcceptedReplacements } from './interactive.js';
 

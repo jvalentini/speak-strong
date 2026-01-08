@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { $ } from 'bun';
 
 const TEST_DIR = join(import.meta.dir, 'fixtures');
-const CLI_PATH = join(import.meta.dir, '../speak-strong.ts');
+const CLI_PATH = join(import.meta.dir, '../src/cli.ts');
 
 beforeAll(() => {
   if (!existsSync(TEST_DIR)) {
