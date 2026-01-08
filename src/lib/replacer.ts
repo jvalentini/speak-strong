@@ -1,8 +1,14 @@
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { Match, ProcessResult, Rule, RulesDatabase, StrictnessLevel } from '../types/index.js';
+import type { Match, ProcessResult, Rule, StrictnessLevel } from '../types/index.js';
+import { getConfig } from '../utils/config.js';
 import { loadJson } from '../utils/file.js';
 import { Logger } from '../utils/logger.js';
+import {
+  formatValidationErrors,
+  type RulesDatabase,
+  validateRulesDatabase,
+} from '../utils/schemas.js';
 import { convertRuleEntry, processWithRules, type TokenRule } from './rule-engine.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -11,13 +17,32 @@ const RULES_PATH = join(__dirname, '../data/rules.json');
 let cachedDb: RulesDatabase | null = null;
 let cachedTokenRules: Map<StrictnessLevel, TokenRule[]> | null = null;
 
+/**
+ * Load and validate the rules database
+ * @throws {Error} If validation fails
+ */
 function loadDatabase(): RulesDatabase {
-  if (cachedDb) {
+  const config = getConfig();
+
+  if (cachedDb && config.rules.cacheEnabled) {
     return cachedDb;
   }
-  cachedDb = loadJson<RulesDatabase>(RULES_PATH);
-  Logger.debug(`Loaded rules database v${cachedDb.version}`);
-  return cachedDb;
+
+  const rawData = loadJson<unknown>(RULES_PATH);
+
+  try {
+    const validatedDb = validateRulesDatabase(rawData);
+    cachedDb = validatedDb;
+    Logger.debug(`Loaded and validated rules database v${validatedDb.version}`);
+    return validatedDb;
+  } catch (error) {
+    if (error instanceof Error && 'issues' in error) {
+      const zodError = error as import('zod').ZodError;
+      const message = formatValidationErrors(zodError);
+      throw new Error(`Invalid rules.json:\n${message}`);
+    }
+    throw error;
+  }
 }
 
 function buildTokenRules(): Map<StrictnessLevel, TokenRule[]> {

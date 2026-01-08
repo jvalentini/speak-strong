@@ -8,11 +8,22 @@ import type {
   StrictnessLevel,
 } from '../types/index.js';
 import { bold, cyan, dim, green, red, yellow } from '../utils/colors.js';
+import { getConfig } from '../utils/config.js';
 import { writeTextFile } from '../utils/file.js';
 
-const HISTORY_DIR = join(homedir(), '.speak-strong');
-const HISTORY_FILE = join(HISTORY_DIR, 'history.json');
-const MAX_ENTRIES = 100;
+function getHistoryDir(): string {
+  const config = getConfig();
+  return config.history.historyDir || join(homedir(), '.speak-strong');
+}
+
+function getHistoryFile(): string {
+  return join(getHistoryDir(), 'history.json');
+}
+
+function getMaxEntries(): number {
+  return getConfig().history.maxEntries;
+}
+
 const CURRENT_VERSION = 1;
 
 function generateId(): string {
@@ -20,26 +31,28 @@ function generateId(): string {
 }
 
 function ensureHistoryDir(): void {
-  if (!existsSync(HISTORY_DIR)) {
-    mkdirSync(HISTORY_DIR, { recursive: true });
+  const historyDir = getHistoryDir();
+  if (!existsSync(historyDir)) {
+    mkdirSync(historyDir, { recursive: true });
   }
 }
 
 export function loadHistory(): HistoryDatabase {
   ensureHistoryDir();
+  const historyFile = getHistoryFile();
 
-  if (!existsSync(HISTORY_FILE)) {
+  if (!existsSync(historyFile)) {
     return { version: CURRENT_VERSION, entries: [] };
   }
 
   try {
-    const content = readFileSync(HISTORY_FILE, 'utf-8');
+    const content = readFileSync(historyFile, 'utf-8');
     const db = JSON.parse(content) as HistoryDatabase;
     return db;
   } catch {
-    const backupPath = `${HISTORY_FILE}.backup`;
-    if (existsSync(HISTORY_FILE)) {
-      writeFileSync(backupPath, readFileSync(HISTORY_FILE));
+    const backupPath = `${historyFile}.backup`;
+    if (existsSync(historyFile)) {
+      writeFileSync(backupPath, readFileSync(historyFile));
       console.error(yellow(`History file corrupted. Backed up to ${backupPath}`));
     }
     return { version: CURRENT_VERSION, entries: [] };
@@ -48,11 +61,13 @@ export function loadHistory(): HistoryDatabase {
 
 function saveHistory(db: HistoryDatabase): void {
   ensureHistoryDir();
-  writeFileSync(HISTORY_FILE, JSON.stringify(db, null, 2));
+  const historyFile = getHistoryFile();
+  writeFileSync(historyFile, JSON.stringify(db, null, 2));
 }
 
 export function saveEntry(entry: Omit<HistoryEntry, 'id' | 'timestamp'>): HistoryEntry {
   const db = loadHistory();
+  const maxEntries = getMaxEntries();
 
   const fullEntry: HistoryEntry = {
     ...entry,
@@ -62,8 +77,8 @@ export function saveEntry(entry: Omit<HistoryEntry, 'id' | 'timestamp'>): Histor
 
   db.entries.unshift(fullEntry);
 
-  if (db.entries.length > MAX_ENTRIES) {
-    db.entries = db.entries.slice(0, MAX_ENTRIES);
+  if (db.entries.length > maxEntries) {
+    db.entries = db.entries.slice(0, maxEntries);
   }
 
   saveHistory(db);
