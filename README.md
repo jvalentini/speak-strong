@@ -147,6 +147,32 @@ I wanted to check if I think we should try this.
 ── Stats: 1 accepted, 1 skipped ──
 ```
 
+### Watch Mode
+
+Monitor a file for changes and automatically reprocess:
+
+```bash
+speak-strong -f email.txt --watch
+speak-strong -f email.txt -o strong.txt -w
+```
+
+Watch mode will:
+- Process the file immediately on start
+- Reprocess whenever the file changes
+- Show timestamps and change summaries
+- Write to output file if specified (or stdout)
+
+```
+Watching: email.txt
+Press Ctrl+C to stop
+
+[10:42:15] email.txt: 2 replacements
+[10:42:30] email.txt: 3 replacements, 1 suggestion
+
+^C
+Stopped watching.
+```
+
 ### Verbosity Options
 
 ```bash
@@ -236,7 +262,8 @@ speak-strong/
 │   ├── lib/
 │   │   ├── interactive.ts # Interactive mode prompts
 │   │   ├── replacer.ts   # Core replacement engine
-│   │   └── reporter.ts   # Output formatting
+│   │   ├── reporter.ts   # Output formatting
+│   │   └── watcher.ts    # File watching for --watch mode
 │   ├── types/
 │   │   └── index.ts      # TypeScript interfaces
 │   ├── utils/

@@ -38,6 +38,7 @@ export interface CliOptions {
   quiet?: boolean;
   debug?: boolean;
   interactive?: boolean;
+  watch?: boolean;
 }
 
 export type InteractiveAction = 'accept' | 'skip' | 'accept-all' | 'skip-all' | 'quit';

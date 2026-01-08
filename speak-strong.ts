@@ -12,6 +12,7 @@ import {
   logInteractiveStats,
   logStats,
 } from './src/lib/reporter.js';
+import { watchFile } from './src/lib/watcher.js';
 import type { CliOptions, InteractiveResult, ProcessResult } from './src/types/index.js';
 import { dim, error, warning } from './src/utils/colors.js';
 import {
@@ -47,6 +48,7 @@ STRICTNESS LEVELS:
 
 OPTIONS:
   -i, --interactive      Review each replacement before applying
+  -w, --watch            Watch file for changes and reprocess
   -v, --verbose          Show detailed progress
   -q, --quiet            Suppress all output except result
   --debug                Show debug information
@@ -59,6 +61,7 @@ EXAMPLES:
   speak-strong -f notes.txt --moderate
   speak-strong -m "I think we should" --aggressive
   speak-strong -f email.txt -i              # Interactive mode
+  speak-strong -f email.txt --watch         # Watch mode
 `);
 }
 
@@ -100,6 +103,10 @@ function parseArgs(args: string[]): CliOptions {
       case '--interactive':
         options.interactive = true;
         break;
+      case '-w':
+      case '--watch':
+        options.watch = true;
+        break;
       case '--debug':
         options.debug = true;
         break;
@@ -132,6 +139,12 @@ function validateOptions(options: CliOptions): void {
   }
   if (options.moderate && options.aggressive) {
     throw new ArgumentError('Cannot use both --moderate and --aggressive');
+  }
+  if (options.watch && !options.file) {
+    throw new ArgumentError('--watch requires --file (cannot watch a message)');
+  }
+  if (options.watch && options.interactive) {
+    throw new ArgumentError('Cannot use both --watch and --interactive');
   }
 }
 
@@ -201,7 +214,7 @@ async function main(): Promise<void> {
     validateOptions(options);
 
     Logger.configure({
-      quiet: options.interactive ? true : options.quiet,
+      quiet: options.interactive || options.watch ? true : options.quiet,
       verbose: options.verbose,
       debug: options.debug,
     });
@@ -209,10 +222,27 @@ async function main(): Promise<void> {
     Logger.verbose(`speak-strong v${VERSION}`);
     Logger.debug('Options:', JSON.stringify(options));
 
+    const level = getStrictnessLevel(options);
+
+    if (options.watch && options.file) {
+      const { stop } = watchFile({
+        file: options.file,
+        output: options.output,
+        level,
+        quiet: options.quiet,
+      });
+
+      process.on('SIGINT', () => {
+        stop();
+        process.exit(0);
+      });
+
+      await new Promise(() => {});
+      return;
+    }
+
     const inputText = getInputText(options);
     Logger.verbose(`Processing ${inputText.length} characters`);
-
-    const level = getStrictnessLevel(options);
     Logger.verbose(`Using strictness level: ${level}`);
 
     const result = processText(inputText, level);
